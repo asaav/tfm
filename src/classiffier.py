@@ -5,45 +5,52 @@ import os
 import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
 import random
+from sklearn.metrics import classification_report, confusion_matrix
+from models import AlexNet, fMnist, fcc_fMnist
+import sys
 
-HP_NUM_UNITS = hp.HParam('num_units', hp.Discrete([100, 150, 200, 250, 300, 350]))
-HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2))
 HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
 
 METRIC_ACCURACY = 'accuracy'
 
 with tf.summary.create_file_writer('logs/hparam_tuning').as_default():
-     hp.hparams_config(
-     hparams=[HP_NUM_UNITS, HP_DROPOUT, HP_OPTIMIZER],
-     metrics=[hp.Metric(METRIC_ACCURACY, display_name='Accuracy')],
-     )
+    hp.hparams_config(
+        hparams=[HP_OPTIMIZER],
+        metrics=[hp.Metric(METRIC_ACCURACY, display_name='Accuracy')],
+    )
 
 
-def train_test_model(hparams, dataset_train, dataset_test):
-     model = tf.keras.models.Sequential([
-          tf.keras.layers.Flatten(input_shape=(56, 56, 3)),
-          tf.keras.layers.Dense(hparams[HP_NUM_UNITS], activation=tf.nn.relu),
-          tf.keras.layers.Dropout(hparams[HP_DROPOUT]),
-          tf.keras.layers.Dense(hparams[HP_NUM_UNITS], activation=tf.nn.relu),
-          tf.keras.layers.Dense(hparams[HP_NUM_UNITS], activation=tf.nn.relu),
-          #tf.keras.layers.Dropout(hparams[HP_DROPOUT]),
-          tf.keras.layers.Dense(2, activation=tf.nn.softmax),
-     ])
-     model.compile(
-          optimizer=hparams[HP_OPTIMIZER],
-          loss='sparse_categorical_crossentropy',
-          metrics=['accuracy'],
-     )
+def train_test_model(hparams, dataset_train, dataset_test, dataset_val, architecture="A"):
+    model = None
+    if architecture == "A":
+        model = AlexNet
+    elif architecture == "MNIST":
+        model = fMnist
+    elif architecture == "FCN":
+        model = fcc_fMnist
 
-     model.fit(dataset_train, epochs=60, verbose=0)
-     _, accuracy = model.evaluate(dataset_test, verbose=1)
-     return accuracy
+    model.summary()
+
+    model.compile(
+        optimizer=hparams[HP_OPTIMIZER],
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy'],
+    )
+
+    model.fit(dataset_train, epochs=60, validation_data=dataset_val)#, verbose=0)
+    Y_pred = model.predict(dataset_test)
+    y_pred = np.argmax(Y_pred, axis=1)
+    print('Confusion Matrix')
+    print(confusion_matrix(dataset_test.classes, y_pred))
+    accuracy = model.evaluate(dataset_test, verbose=0)[1]
+    print("Accuracy: ", accuracy)
+    return accuracy
 
 def run(run_dir, hparams):
-     with tf.summary.create_file_writer(run_dir).as_default():
-          hp.hparams(hparams)  # record the values used in this trial
-          accuracy = train_test_model(hparams, dataset_train, dataset_test)
-          tf.summary.scalar(METRIC_ACCURACY, accuracy, step=1)
+    with tf.summary.create_file_writer(run_dir).as_default():
+        hp.hparams(hparams)  # record the values used in this trial
+        accuracy = train_test_model(hparams, dataset_train, dataset_test, dataset_val, sys.argv[1])
+        tf.summary.scalar(METRIC_ACCURACY, accuracy, step=1)
 
 
 session_num = 0
@@ -53,44 +60,22 @@ tf.random.set_seed(seed)
 
 datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
 
+input_size=(56,56)
+batch_size=43
 # load and iterate training dataset
 dataset_train = datagen.flow_from_directory('dataset/train', class_mode='binary',
-     batch_size=25, target_size=(56,56), seed=seed)
+                                            batch_size=batch_size, target_size=input_size, seed=seed)
 dataset_test = datagen.flow_from_directory('dataset/test', class_mode='binary',
-     batch_size=25, target_size=(56,56), seed=seed)
+                                           batch_size=batch_size, target_size=input_size, seed=seed, shuffle=False)
+dataset_val = datagen.flow_from_directory('dataset/val', class_mode='binary',
+                                           batch_size=batch_size, target_size=input_size, seed=seed)
 
-# image_batch, label_batch = next(dataset_train)
-# show_batch(image_batch, label_batch)
-
-# model = tf.keras.models.Sequential([
-#   tf.keras.layers.Flatten(input_shape=(56, 56, 3)),
-#   tf.keras.layers.Dense(300, activation='relu'),
-#   tf.keras.layers.Dropout(0.2),
-#   tf.keras.layers.Dense(300, activation='relu'),
-#   tf.keras.layers.Dense(200, activation='relu'),
-#   tf.keras.layers.Dense(2, activation='softmax')
-# ])
-
-# model.compile(optimizer='adam',
-#               loss='sparse_categorical_crossentropy',
-#               metrics=['accuracy'])
-
-# model.fit(dataset_train, epochs=25)
-# model.evaluate(dataset_test)
-
-
-for num_units in HP_NUM_UNITS.domain.values:
-  for dropout_rate in (HP_DROPOUT.domain.min_value, HP_DROPOUT.domain.max_value):
-    for optimizer in HP_OPTIMIZER.domain.values:
-      hparams = {
-          HP_NUM_UNITS: num_units,
-          HP_DROPOUT: dropout_rate,
-          HP_OPTIMIZER: optimizer,
-      }
-      run_name = "run-%d" % session_num
-      print('--- Starting trial: %s' % run_name)
-      print({h.name: hparams[h] for h in hparams})
-      run('logs/hparam_tuning/' + run_name, hparams)
-      session_num += 1
-
-
+for optimizer in HP_OPTIMIZER.domain.values:
+     hparams = {
+          HP_OPTIMIZER: optimizer
+     }
+     run_name = "run-%d" % session_num
+     print('--- Starting trial: %s' % run_name)
+     print({h.name: hparams[h] for h in hparams})
+     run('logs/hparam_tuning/' + run_name, hparams)
+     session_num += 1
