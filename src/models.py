@@ -29,7 +29,7 @@ fMnist = Sequential([
     MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="valid"),
     Conv2D(256,(3,3),activation="relu", padding="same"),
     Conv2D(256,(3,3),activation="relu", padding="same"),
-    MaxPooling2D(2),
+    MaxPooling2D(pool_size=(2,2), padding="valid"),
     # Conv2D(512,(3,3),activation="relu", padding="same"),
     # Conv2D(512,(3,3),activation="relu", padding="same"),
     Flatten(),
@@ -39,14 +39,15 @@ fMnist = Sequential([
 
 ])
 
-fcc_fMnist = Sequential([
+fcn_fMnist = Sequential([
     Conv2D(64, (5, 5), padding="same",
         activation="relu", input_shape=(56, 56, 3)),
     MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="valid"),
     Conv2D(256,(3,3),activation="relu", padding="same"),
     Conv2D(256,(3,3),activation="relu", padding="same"),
-    MaxPooling2D(2),
-    Conv2D(256,(13,13),activation="relu", padding="same"),
+    MaxPooling2D(pool_size=(2,2), padding="valid"),
+    Conv2D(256,(13,13),activation="relu", padding="valid"),
     Dropout(0.4),
-    Conv2D(2,(1,1),activation="softmax", padding="same")
+    Conv2D(2,(1,1),activation="softmax", padding="valid"),
+    Flatten()
 ])

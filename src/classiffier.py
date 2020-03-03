@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
 import random
 from sklearn.metrics import classification_report, confusion_matrix
-from models import AlexNet, fMnist, fcc_fMnist
+from models import AlexNet, fMnist, fcn_fMnist
 import sys
 
 HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
@@ -27,12 +27,12 @@ def train_test_model(hparams, dataset_train, dataset_test, dataset_val, architec
     elif architecture == "MNIST":
         model = fMnist
     elif architecture == "FCN":
-        model = fcc_fMnist
+        model = fcn_fMnist
 
     model.summary()
 
     model.compile(
-        optimizer=hparams[HP_OPTIMIZER],
+        optimizer="adam",
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy'],
     )
@@ -61,7 +61,7 @@ tf.random.set_seed(seed)
 datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
 
 input_size=(56,56)
-batch_size=43
+batch_size=64
 # load and iterate training dataset
 dataset_train = datagen.flow_from_directory('dataset/train', class_mode='binary',
                                             batch_size=batch_size, target_size=input_size, seed=seed)

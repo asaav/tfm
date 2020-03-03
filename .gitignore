@@ -130,6 +130,9 @@ dmypy.json
 *.caffemodel
 *.prototxt
 
-src/examples/*
-src/dataset/*
-src/logs/*
+src/examples/
+src/dataset/
+src/logs/
+
+src/.idea/
+src/.vscode/
