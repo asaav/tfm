@@ -1,61 +1,49 @@
-from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
 import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
 import random
 from sklearn.metrics import classification_report, confusion_matrix
-from models import AlexNet, fMnist, fcn_fMnist
+import models
 import sys
+from numpy.random import seed
 
 HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
-
-METRIC_ACCURACY = 'accuracy'
-
-with tf.summary.create_file_writer('logs/hparam_tuning').as_default():
-    hp.hparams_config(
-        hparams=[HP_OPTIMIZER],
-        metrics=[hp.Metric(METRIC_ACCURACY, display_name='Accuracy')],
-    )
-
 
 def train_test_model(hparams, dataset_train, dataset_test, dataset_val, architecture="A"):
     model = None
     if architecture == "A":
-        model = AlexNet
+        model = models.get_AlexNet()
     elif architecture == "MNIST":
-        model = fMnist
+        model = models.get_fMnist()
     elif architecture == "FCN":
-        model = fcn_fMnist
+        model = models.get_fcnfMnist()
 
     model.summary()
 
     model.compile(
-        optimizer="adam",
+        optimizer=hparams[HP_OPTIMIZER],
         loss='sparse_categorical_crossentropy',
-        metrics=['accuracy'],
+        metrics=['accuracy']
     )
 
     model.fit(dataset_train, epochs=60, validation_data=dataset_val)#, verbose=0)
     Y_pred = model.predict(dataset_test)
-    y_pred = np.argmax(Y_pred, axis=1)
+    y_pred = [np.argmax(p) for p in Y_pred]
     print('Confusion Matrix')
     print(confusion_matrix(dataset_test.classes, y_pred))
     accuracy = model.evaluate(dataset_test, verbose=0)[1]
     print("Accuracy: ", accuracy)
     return accuracy
 
-def run(run_dir, hparams):
-    with tf.summary.create_file_writer(run_dir).as_default():
-        hp.hparams(hparams)  # record the values used in this trial
-        accuracy = train_test_model(hparams, dataset_train, dataset_test, dataset_val, sys.argv[1])
-        tf.summary.scalar(METRIC_ACCURACY, accuracy, step=1)
+def run(hparams):
+    train_test_model(hparams, dataset_train, dataset_test, dataset_val, sys.argv[1])
 
 
 session_num = 0
 seed = 42
-random.seed(seed)
+np.random.seed(seed)
 tf.random.set_seed(seed)
 
 datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
@@ -77,5 +65,5 @@ for optimizer in HP_OPTIMIZER.domain.values:
      run_name = "run-%d" % session_num
      print('--- Starting trial: %s' % run_name)
      print({h.name: hparams[h] for h in hparams})
-     run('logs/hparam_tuning/' + run_name, hparams)
+     run(hparams)
      session_num += 1
