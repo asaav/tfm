@@ -1,5 +1,6 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Activation
+import tensorflow as tf
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Activation, Reshape, Input
 
 def get_AlexNet():
     return Sequential([
@@ -43,13 +44,28 @@ def get_fMnist():
 def get_fcnfMnist():
     return Sequential([
         Conv2D(64, (5, 5), padding="same",
-            activation="relu", input_shape=(56, 56, 3)),
+            activation="relu", input_shape=(None, None, 3)),
         MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="valid"),
         Conv2D(256,(3,3),activation="relu", padding="same"),
         Conv2D(256,(3,3),activation="relu", padding="same"),
         MaxPooling2D(pool_size=(2,2), padding="valid"),
         Conv2D(256,(13,13),activation="relu", padding="valid"),
         Dropout(0.4),
-        Conv2D(2,(1,1),activation="softmax", padding="valid"),
-        #Activation('softmax')
+        Conv2D(1,(1,1),activation="sigmoid", padding="valid"),
+        Reshape((1,))
     ])
+
+def test():
+    entrada=Input(shape=(None, None, 3))
+    x=Conv2D(64, (5, 5), padding="same", activation="relu")(entrada)
+    x=MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="valid")(x)
+    x=Conv2D(256,(3,3),activation="relu", padding="same")(x)
+    x=Conv2D(256,(3,3),activation="relu", padding="same")(x)
+    x=MaxPooling2D(pool_size=(2,2), padding="valid")(x)
+    x=Conv2D(256,(13,13),activation="relu", padding="valid")(x)
+    x=Dropout(0.4)(x)
+    res=Conv2D(1,(1,1),activation="sigmoid", padding="valid")(x)
+    training_res = Reshape((1,))(res)
+    
+    return (Model(entrada, [training_res]), Model(entrada, [res]))
+    
