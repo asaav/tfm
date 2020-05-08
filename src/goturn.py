@@ -1,5 +1,6 @@
-import cv2
 import sys
+
+import cv2
 
 
 def scale_image(img, factor):

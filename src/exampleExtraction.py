@@ -1,35 +1,43 @@
 import os
 import pickle
 import sys
-import cv2
 
-from comargs import process_args
+import cv2
 from PyQt5 import QtWidgets
 
+from comargs import process_args
+
 WSIZE = 28
+
 
 def scale_image(img, factor):
     height, width = img.shape[:2]
     scaledw = int(width * factor)
     scaledh = int(height * factor)
-    return cv2.resize(img, (scaledw, scaledh), interpolation=cv2.INTER_CUBIC), scaledw, scaledh
+    return cv2.resize(img, (scaledw, scaledh),
+                      interpolation=cv2.INTER_CUBIC), scaledw, scaledh
 
 
 def main():
     img = None
+
     def mouse_events(event, x, y, flags, params):
-        positive_examples = len([name for name in os.listdir('./yes') if os.path.isfile('./yes/' + name)])
-        negative_examples = len([name for name in os.listdir('./no') if os.path.isfile('./no/' + name)])
-        region = img[y - WSIZE//2:y+WSIZE + WSIZE//2,x-WSIZE//2:x+WSIZE + WSIZE//2]
+        positive_examples = len([name for name in os.listdir(
+            './yes') if os.path.isfile('./yes/' + name)])
+        negative_examples = len([name for name in os.listdir(
+            './no') if os.path.isfile('./no/' + name)])
+        region = img[y - WSIZE//2:y+WSIZE + WSIZE //
+                     2, x-WSIZE//2:x+WSIZE + WSIZE//2]
         img_cloned = img.copy()
         if event == cv2.EVENT_MOUSEMOVE:
-            cv2.rectangle(img_cloned, (x-WSIZE//2,y-WSIZE//2), (x+WSIZE + WSIZE//2, y+WSIZE + WSIZE//2), (0,255,0))
+            cv2.rectangle(img_cloned, (x-WSIZE//2, y-WSIZE//2),
+                          (x+WSIZE + WSIZE//2, y+WSIZE + WSIZE//2),
+                          (0, 255, 0))
             cv2.imshow("capture", img_cloned)
         if event == cv2.EVENT_LBUTTONDOWN:
             cv2.imwrite('./yes/' + str(positive_examples + 1) + '.png', region)
         if event == cv2.EVENT_MBUTTONDOWN:
             cv2.imwrite('./no/' + str(negative_examples + 1) + '.png', region)
-        
 
     args = process_args()
 
