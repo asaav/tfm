@@ -40,7 +40,7 @@ def get_fMnist():
         Flatten(),
         Dense(256, activation="relu"),
         Dropout(0.4),
-        Dense(10, activation="softmax"),
+        Dense(2, activation="softmax"),
     ])
 
 

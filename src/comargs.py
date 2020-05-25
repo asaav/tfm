@@ -23,11 +23,9 @@ def classifier_train_args():
     parser.add_argument("-a", "--architecture",
                         choices=["AlexNet", "FCN", "MNIST"],
                         default="FCN", help="model to use")
-    parser.add_argument("-i", "--input", type=int,
-                        default=56, help="input shape (assummes square image)")
     parser.add_argument("-b", "--batch", type=int,
                         default=64, help="batch size")
-    parser.add_argument("--summarize", help="summarize model after getting")
+    parser.add_argument("--summarize", action="store_true", help="summarize model after getting")
     return parser.parse_args()
 
 

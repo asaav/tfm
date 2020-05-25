@@ -14,9 +14,6 @@ import models
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
-HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam']))
-results = []
-session_num = 0
 seed = 42
 np.random.seed(seed)
 tf.random.set_seed(seed)
@@ -29,9 +26,15 @@ train_datagen = ImageDataGenerator(rescale=1./255, vertical_flip=True,
 test_datagen = ImageDataGenerator(rescale=1./255)
 
 batch_size = args.batch
-input_size = (args.input, args.input)
+
+# Set up input size depending on chosen architecture 
+if(args.architecture == "AlexNet"):
+    input_size = (227, 227)
+else:
+    input_size = (56, 56)
+
 # load datasets
-dataset_train = train_datagen.flow_from_directory(
+dataset_train = test_datagen.flow_from_directory(
     args.dataset + 'train',
     class_mode='binary', batch_size=batch_size,
     target_size=input_size, seed=seed
@@ -48,8 +51,17 @@ dataset_test = test_datagen.flow_from_directory(
     target_size=input_size, seed=seed, shuffle=False
 )
 
+def get_run_logdir():
+    import time
+    run_id = time.strftime("run_%Y_%m_%d-%H_%M_%S")
+    log_dir = os.path.join(".", "logs")
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    return os.path.join(log_dir, run_id)
 
-def train_test_model(hparams):
+
+
+def train_test_model():
 
     architecture = args.architecture
 
@@ -66,11 +78,16 @@ def train_test_model(hparams):
     elif architecture == "FCN":
         train_model, ev_model = models.get_fcnfMnist()
 
-    if args.summarize:
+    if args.summarize: ## Print summary if arg if needed
         train_model.summary()
 
+    # Set up tensorboard callbacks
+    run_logdir = get_run_logdir()
+    tensorboard_cb = tf.keras.callbacks.TensorBoard(run_logdir)
+
+    # Compile and train model with EarlyStopping
     train_model.compile(
-        optimizer=hparams[HP_OPTIMIZER],
+        optimizer="adam",
         loss='binary_crossentropy',
         metrics=['accuracy']
     )
@@ -81,48 +98,25 @@ def train_test_model(hparams):
     )
 
     train_model.fit(dataset_train, epochs=1000, validation_data=dataset_val,
-                    callbacks=[early_stopping])
+                    callbacks=[early_stopping, tensorboard_cb])
+
+    # Print confusion matrix after training
     Y_pred = train_model.predict(dataset_test)
     y_pred = [round(p[0]) for p in Y_pred]
     print('Confusion Matrix')
     print(confusion_matrix(dataset_test.classes, y_pred))
     accuracy = train_model.evaluate(dataset_test, verbose=0)[1]
 
-    # zero = np.zeros((1, 58,58, 3))
-    # print(ev_model.predict(zero))
     print("Accuracy: ", accuracy)
     return ev_model, accuracy
 
 
-def run(hparams):
-    model, acc = train_test_model(hparams)
-    results.append({"model": model, "accuracy": acc})
-
-
 def main():
-    session_num = 0
-    for optimizer in HP_OPTIMIZER.domain.values:
-        hparams = {
-            HP_OPTIMIZER: optimizer
-        }
-        run_name = "run-%d" % session_num
-        print('--- Starting trial: %s' % run_name)
-        print({h.name: hparams[h] for h in hparams})
-        run(hparams)
-        session_num += 1
-    print("-------RESULTS-------")
-    for i, elem in enumerate(results):
-        print("Model ", i+1, " accuracy: ", elem['accuracy'])
-    print("Best model is ",
-          np.argmax([elem['accuracy'] for elem in results])+1)
-    if comargs.query_yes_no("Save any model?"):
-        while True:
-            choice = int(input("Which model to save? "))
-            if (choice > 0 and choice <= len(results)):
-                results[choice-1]['model'].save(
-                    "models/" + args.architecture + ".h5"
-                )
-                break
+    model, acc = train_test_model()
+    if comargs.query_yes_no("Save model?"):
+        model.save(
+            "models/" + args.architecture + ".h5"
+        )
 
 
 if __name__ == "__main__":
