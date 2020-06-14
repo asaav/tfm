@@ -17,6 +17,15 @@ def process_args():
     return parser.parse_args()
 
 
+def hardN_examples():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("video", help="video to be processed")
+    parser.add_argument("-s", "--scale", type=restricted_float,
+                        help="scale factor", default=1)
+
+    return parser.parse_args()
+
+
 def classifier_train_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", help="dataset location")
@@ -25,7 +34,8 @@ def classifier_train_args():
                         default="FCN", help="model to use")
     parser.add_argument("-b", "--batch", type=int,
                         default=64, help="batch size")
-    parser.add_argument("--summarize", action="store_true", help="summarize model after getting")
+    parser.add_argument("--summarize", action="store_true",
+                        help="summarize model after getting")
     return parser.parse_args()
 
 

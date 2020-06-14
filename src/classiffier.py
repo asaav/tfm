@@ -1,12 +1,8 @@
 import os
-import random
-import sys
 
 import numpy as np
+from sklearn.metrics import confusion_matrix
 import tensorflow as tf
-from numpy.random import seed
-from sklearn.metrics import classification_report, confusion_matrix
-from tensorboard.plugins.hparams import api as hp
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 import comargs
@@ -27,14 +23,14 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 
 batch_size = args.batch
 
-# Set up input size depending on chosen architecture 
+# Set up input size depending on chosen architecture
 if(args.architecture == "AlexNet"):
     input_size = (227, 227)
 else:
     input_size = (56, 56)
 
 # load datasets
-dataset_train = test_datagen.flow_from_directory(
+dataset_train = train_datagen.flow_from_directory(
     args.dataset + 'train',
     class_mode='binary', batch_size=batch_size,
     target_size=input_size, seed=seed
@@ -51,6 +47,7 @@ dataset_test = test_datagen.flow_from_directory(
     target_size=input_size, seed=seed, shuffle=False
 )
 
+
 def get_run_logdir():
     import time
     run_id = time.strftime("run_%Y_%m_%d-%H_%M_%S")
@@ -58,7 +55,6 @@ def get_run_logdir():
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     return os.path.join(log_dir, run_id)
-
 
 
 def train_test_model():
@@ -78,7 +74,8 @@ def train_test_model():
     elif architecture == "FCN":
         train_model, ev_model = models.get_fcnfMnist()
 
-    if args.summarize: ## Print summary if arg if needed
+    if args.summarize:
+        # Print summary if arg if needed
         train_model.summary()
 
     # Set up tensorboard callbacks
@@ -102,7 +99,8 @@ def train_test_model():
 
     # Print confusion matrix after training
     Y_pred = train_model.predict(dataset_test)
-    y_pred = [round(p[0]) for p in Y_pred]
+    Y_pred = Y_pred.reshape(Y_pred.shape[0])
+    y_pred = [round(p) for p in Y_pred]
     print('Confusion Matrix')
     print(confusion_matrix(dataset_test.classes, y_pred))
     accuracy = train_model.evaluate(dataset_test, verbose=0)[1]
@@ -114,9 +112,7 @@ def train_test_model():
 def main():
     model, acc = train_test_model()
     if comargs.query_yes_no("Save model?"):
-        model.save(
-            "models/" + args.architecture + ".h5"
-        )
+        model.save("models/" + args.architecture + ".h5")
 
 
 if __name__ == "__main__":
