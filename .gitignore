@@ -137,3 +137,4 @@ src/logs/
 src/.idea/
 src/.vscode/
 src/aug*
+src/hnmData/*

@@ -48,6 +48,23 @@ def tracker_args():
     return parser.parse_args()
 
 
+def hnmex_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--scale", type=restricted_float,
+                        help="scale factor", default=1)
+    parser.add_argument("-m", "--model", help="model location")
+    parser.add_argument("-d", "--data", help="dataset location")
+    parser.add_argument("-n", "--hardNegatives", help="hard negative sources")
+    return parser.parse_args()
+
+
+def hnmin_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--model", help="model location")
+    parser.add_argument("-d", "--data", help="dataset location")
+    return parser.parse_args()
+
+
 def query_yes_no(text, default=True):
     valid = {
         "yes": True, "y": True, "ye": True,
