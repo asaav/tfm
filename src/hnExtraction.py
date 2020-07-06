@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import random
 from ast import literal_eval as make_tuple
 
 import cv2
@@ -14,9 +15,11 @@ from comargs import hnmex_args
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 
-FIELD_SIZE = 55
+FIELD_SIZE = 56
 drawing = False
 np.random.seed(42)
+random.seed(42)
+args = hnmex_args()
 
 
 def output2original(xout, yout):
@@ -57,9 +60,70 @@ def save_image(image, path):
     cv2.imwrite(path, image)
 
 
+def get_ball_rectangle(ball_r):
+    # Get 56x56 example that contains
+    start_pos, end_pos = ball_r
+    w = end_pos[0] - start_pos[0]
+    h = end_pos[1] - start_pos[1]
+
+    x_offset = random.randint(0, FIELD_SIZE-w)
+    y_offset = random.randint(0, FIELD_SIZE-h)
+    x = start_pos[0] - x_offset
+    y = start_pos[1] - y_offset
+    return x, y
+
+
+def introduce_new_examples(path, examples, positives):
+    n_examples = 0
+    folders = ["train", "test", "val"]
+    end_path = "yes" if positives else "no"
+    for folder in folders:
+        n_examples += len(os.listdir(os.path.join(args.data,
+                                                  folder, end_path)))
+
+    indexes = range(0, len(examples))
+
+    # Choose n random examples from list with n being min of the original
+    # count or the full list
+    n = min(int(n_examples*.5), len(examples))
+    chosen_idx = np.random.choice(indexes, n, replace=False)
+
+    print("Picked", n, "examples from the total of", len(examples),
+          "examples")
+
+    # Split examples in test, train and validation and write them
+    trainval_ex, test_ex = train_test_split(
+        chosen_idx, test_size=0.1, random_state=42)
+
+    train_ex, val_ex = train_test_split(
+        trainval_ex, test_size=0.111, random_state=42)  # 0.9*0.111 = 0.1
+
+    print("Split examples: train -", len(train_ex),
+          "val -", len(val_ex),
+          "test -", len(test_ex))
+    print("Saving examples in " + path)
+
+    picks = [train_ex, test_ex, val_ex]
+
+    for subdivision, picked in zip(folders, picks):
+        for elem in picked:
+            filename = os.path.join(path, subdivision,
+                                    end_path, 'h'+str(elem)+'.png')
+            save_image(examples[elem], filename)
+
+    # Make symlinks of the original examples in the datasets leaving out
+    # as many examples as we introduced previously
+
+    for folder, pick in zip(folders, picks):
+        print("Creating symbolic links for the original", folder,
+              "negatives, leaving out", len(pick), "examples")
+        create_symlinks(os.path.join(args.data, folder, end_path),
+                        os.path.join(path, folder, end_path),
+                        len(pick))
+
+
 def main():
     # Check directories passed by argument
-    args = hnmex_args()
     if os.path.exists(args.model):
         model = tf.keras.models.load_model(args.model, compile=False)
         print("Model " + args.model + " successfully loaded")
@@ -86,8 +150,9 @@ def main():
         print("Creating " + example_path + " folder.")
         os.mkdir(example_path)
 
-    print("Calculating hard negatives...")
+    print("Calculating hard negatives and positives...")
     hard_negatives = []
+    hard_positives = []
     for filename in os.listdir("hardNegatives"):
 
         # Get ball positions from filename
@@ -114,7 +179,8 @@ def main():
                                                cv2.CHAIN_APPROX_SIMPLE)
         output = cv2.cvtColor(output, cv2.COLOR_GRAY2BGR)
         # Filter contours (positve blobs) by size
-        contours = [c for c in contours if cv2.contourArea(c) > 10]
+        contours = [c for c in contours if cv2.contourArea(c) > 5]
+        ball_is_shape = False
         for c in contours:
             # Compute the center of the contour
             M = cv2.moments(c)
@@ -128,63 +194,22 @@ def main():
             ball_r = (start_pos, end_pos)
             if not rectangleContains(original_rect, ball_r):
                 # Add example to hard negatives list
-                example = img_rgb[oY:oY+FIELD_SIZE, oX:oX+FIELD_SIZE]
-                hard_negatives.append(example)
+                h_neg = img_rgb[oY:oY+FIELD_SIZE, oX:oX+FIELD_SIZE]
+                hard_negatives.append(h_neg)
+            else:
+                ball_is_shape = True
+        if not ball_is_shape:
+            x, y = get_ball_rectangle(ball_r)
+            h_pos = img_rgb[y:y+FIELD_SIZE, x:x+FIELD_SIZE]
+            hard_positives.append(h_pos)
 
     # Once we have every example, pick a sample sized
     # as a fraction of original dataset and save it in the directory
 
-    neg_train_ex = os.listdir(os.path.join(args.data, "train", "no"))
-    neg_val_ex = os.listdir(os.path.join(args.data, "val", "no"))
-
-    negative_examples = len(neg_train_ex) + len(neg_val_ex)
-    indexes = range(0, len(hard_negatives))
-
-    # Choose n random examples from list with n being min of the original
-    # negative count or the full hard negative list
-    n = min(int(negative_examples*.5), len(hard_negatives))
-    choices = np.random.choice(indexes, n, replace=False)
-    print("Picked", n, "examples from the total of", len(hard_negatives))
-
-    # Split examples in train and validation and write them
-    train_choices, val_choices = train_test_split(
-        choices, test_size=0.1, random_state=42)
-
-    print("Split hard negative examples: train -",
-          len(train_choices), "val -", len(val_choices))
-    print("Saving hard negative examples in " + example_path)
-    for choice in train_choices:
-        filename = os.path.join(example_path, 'train',
-                                'no', 'h'+str(choice)+'.png')
-        save_image(hard_negatives[choice], filename)
-    for choice in val_choices:
-        filename = os.path.join(example_path, 'val',
-                                'no', 'h'+str(choice)+'.png')
-        save_image(hard_negatives[choice], filename)
-
-    # Make symlinks of the original examples in the datasets leaving out
-    # as many examples as we introduced previously
-    print("Creating symbolic links for the original train negatives, "
-          "leaving out", len(train_choices), "examples")
-    create_symlinks(os.path.join(args.data, "train", "no"),
-                    os.path.join(example_path, 'train', 'no'),
-                    len(train_choices))
-
-    print("Creating symbolic links for the original val negatives, "
-          "leaving out", len(val_choices), "examples")
-    create_symlinks(os.path.join(args.data, "val", "no"),
-                    os.path.join(example_path, 'val', 'no'),
-                    len(val_choices))
-
-    print("Creating symbolic links for the original test negatives")
-    create_symlinks(os.path.join(args.data, "test", "no"),
-                    os.path.join(example_path, 'test', 'no'))
-
-    # Create symlinks for positive examples in test, train and val
-    print("Crating symbolic links for the original positive examples")
-    for folder in ["train", "val", "test"]:
-        create_symlinks(os.path.join(args.data, folder, "yes"),
-                        os.path.join(example_path, folder, 'yes'))
+    print("Introducing hard positives into dataset")
+    introduce_new_examples(example_path, hard_positives, True)
+    print("Introducing hard negatives into dataset")
+    introduce_new_examples(example_path, hard_negatives, False)
 
 
 if __name__ == '__main__':
