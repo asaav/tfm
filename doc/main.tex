@@ -1,0 +1,28 @@
+% Cabecera
+\include{header}
+
+\begin{document}
+% Portada
+\include{portada}
+\include{preambulo}
+
+%Índice
+\tableofcontents
+\newpage
+
+%Índice de figuras
+\listoffigures
+\newpage
+
+% Cuerpo del documento
+\include{abstract}
+\input{introduccion}
+\input{stateoftheart}
+\input{analisis}
+\input{design}
+\input{conclusion}
+\newpage
+
+\addcontentsline{toc}{section}{References}
+\bibliography{bibliography}
+\end{document}
