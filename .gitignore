@@ -132,9 +132,10 @@ dmypy.json
 
 src/examples/
 src/dataset/
+src/newExamples/
+src/newDataset/
 src/logs/
 
 src/.idea/
 src/.vscode/
-src/aug*
 src/hnmData/*

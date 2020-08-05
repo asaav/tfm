@@ -2,6 +2,8 @@ import os
 import re
 import sys
 import random
+import math
+import json
 from ast import literal_eval as make_tuple
 
 import cv2
@@ -14,18 +16,34 @@ from comargs import hnmex_args
 # Print only tensorflow error and warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
-
+DIST_THRESHOLD = 20
 FIELD_SIZE = 56
 drawing = False
 np.random.seed(42)
 random.seed(42)
-args = hnmex_args()
+included = {'yes': [], 'no': []}
+found = {'yes': [], 'no': []}
 
 
 def output2original(xout, yout):
     x_ = xout * 4
     y_ = yout * 4
     return x_, y_
+
+
+def distance(rect1, rect2):
+    (x, y) = rect1[0]
+    (x_end, y_end) = rect1[1]
+    (x1, y1) = rect2[0]
+    (x1_end, y1_end) = rect2[1]
+
+    # Compute rectangle centroids and calculate distance between them
+    center_r1 = (x + x_end/2, y + y_end/2)
+    center_r2 = (x1 + x1_end/2, y1 + y1_end/2)
+
+    dist = math.sqrt((center_r2[0] - center_r1[0])**2 +
+                     (center_r2[0] - center_r1[0])**2)
+    return dist
 
 
 def rectangleContains(rect1: (tuple, tuple), rect2: (tuple, tuple)):
@@ -61,7 +79,7 @@ def save_image(image, path):
 
 
 def get_ball_rectangle(ball_r):
-    # Get 56x56 example that contains
+    # Get 56x56 example that contains ball with random offset
     start_pos, end_pos = ball_r
     w = end_pos[0] - start_pos[0]
     h = end_pos[1] - start_pos[1]
@@ -73,12 +91,12 @@ def get_ball_rectangle(ball_r):
     return x, y
 
 
-def introduce_new_examples(path, examples, positives):
+def selecintr_new_examples(src_path, dst_path, it, examples, positives):
     n_examples = 0
     folders = ["train", "test", "val"]
     end_path = "yes" if positives else "no"
     for folder in folders:
-        n_examples += len(os.listdir(os.path.join(args.data,
+        n_examples += len(os.listdir(os.path.join(src_path,
                                                   folder, end_path)))
 
     indexes = range(0, len(examples))
@@ -87,6 +105,15 @@ def introduce_new_examples(path, examples, positives):
     # count or the full list
     n = min(int(n_examples*.5), len(examples))
     chosen_idx = np.random.choice(indexes, n, replace=False)
+
+    # Mark examples as included to avoid selecting them in future iterations
+    subset = included[end_path]
+    for idx in chosen_idx:
+        elem = found[end_path][idx]
+        if positives:
+            subset.append(elem)
+        else:
+            subset.append(elem)
 
     print("Picked", n, "examples from the total of", len(examples),
           "examples")
@@ -101,14 +128,16 @@ def introduce_new_examples(path, examples, positives):
     print("Split examples: train -", len(train_ex),
           "val -", len(val_ex),
           "test -", len(test_ex))
-    print("Saving examples in " + path)
+    print("Saving examples in " + dst_path)
 
     picks = [train_ex, test_ex, val_ex]
 
     for subdivision, picked in zip(folders, picks):
         for elem in picked:
-            filename = os.path.join(path, subdivision,
-                                    end_path, 'h'+str(elem)+'.png')
+            filename = os.path.join(
+                dst_path, subdivision,
+                end_path, 'it' + it + '_h' + str(elem)+'.png'
+            )
             save_image(examples[elem], filename)
 
     # Make symlinks of the original examples in the datasets leaving out
@@ -116,50 +145,39 @@ def introduce_new_examples(path, examples, positives):
 
     for folder, pick in zip(folders, picks):
         print("Creating symbolic links for the original", folder,
-              "negatives, leaving out", len(pick), "examples")
-        create_symlinks(os.path.join(args.data, folder, end_path),
-                        os.path.join(path, folder, end_path),
+              "examples, leaving out", len(pick))
+        create_symlinks(os.path.join(src_path, folder, end_path),
+                        os.path.join(dst_path, folder, end_path),
                         len(pick))
 
 
-def main():
-    # Check directories passed by argument
-    if os.path.exists(args.model):
-        model = tf.keras.models.load_model(args.model, compile=False)
-        print("Model " + args.model + " successfully loaded")
-    else:
-        sys.exit("Model " + args.model + " does not exist")
-    if not os.path.exists(args.hardNegatives):
-        sys.exit("Path" + args.hardNegatives + " directory does not exist")
-    if not os.path.exists(args.data):
-        sys.exit("Path" + args.data + " directory does not exist")
+def is_used(element, positive):
+    frame = element['frame']
+    if positive and frame in found['yes']:
+        # Hard positives are a on-in-frame occurrence,
+        # so if the frame was included, we can be sure without checking boxes
+        return True
+    elif not positive:
+        # Check every form found, if any of them is within certain
+        # distance of our element, we consider it as used
+        for patch in found['no']:
+            if (distance(element['position'], patch['position'])
+                    < DIST_THRESHOLD):
+                return True
+    return False
 
-    it_regex = r'it(\d+)(.+?)\.'
-    match = re.match(it_regex, os.path.basename(args.model))
-    iteration = match.group(1)
-    name = match.group(2)
 
-    # Create directories for hard negative examples, model and iteration
-    # in case they dont already exist
-    if not os.path.exists("hnmData"):
-        os.mkdir("hnmData")
-    if not os.path.exists(os.path.join("hnmData", name)):
-        os.mkdir(os.path.join("hnmData", name))
-    example_path = os.path.join("hnmData", name, 'it' + iteration)
-    if not os.path.exists(example_path):
-        print("Creating " + example_path + " folder.")
-        os.mkdir(example_path)
-
-    print("Calculating hard negatives and positives...")
-    hard_negatives = []
+def get_hard_examples(model):
     hard_positives = []
+    hard_negatives = []
     for filename in os.listdir("hardNegatives"):
 
         # Get ball positions from filename
-        regex = re.compile(r'\d+-(\d+,\d+)-(\d+,\d+)\D+$')
+        regex = re.compile(r'(\d+)-(\d+,\d+)-(\d+,\d+)\D+$')
         match = re.match(regex, filename)
-        start_pos = make_tuple(match.group(1))
-        end_pos = make_tuple(match.group(2))
+        frame = match.group(1)
+        start_pos = make_tuple(match.group(2))
+        end_pos = make_tuple(match.group(3))
         example = cv2.imread(os.path.join("hardNegatives", filename))
 
         # Convert input image to RGB since model works in that color space
@@ -167,11 +185,6 @@ def main():
         img_rgb = cv2.cvtColor(example, cv2.COLOR_BGR2RGB)
         output = model.predict(np.expand_dims(img_rgb, axis=0))
         output = np.squeeze(output, axis=0)
-
-        # Paint rectangle for visual reference
-        color = (0, 255, 0)
-        example = cv2.rectangle(example, start_pos, end_pos,
-                                color, 1)
 
         # Get contours out of positve blobs in model output
         output = (output * 255).astype(np.uint8)
@@ -181,7 +194,7 @@ def main():
         # Filter contours (positve blobs) by size
         contours = [c for c in contours if cv2.contourArea(c) > 5]
         ball_is_shape = False
-        for c in contours:
+        for i, c in enumerate(contours):
             # Compute the center of the contour
             M = cv2.moments(c)
             cX = int(M["m10"] / M["m00"])
@@ -192,24 +205,81 @@ def main():
             oX, oY = output2original(cX, cY)
             original_rect = ((oX, oY), (oX + FIELD_SIZE, oY + FIELD_SIZE))
             ball_r = (start_pos, end_pos)
-            if not rectangleContains(original_rect, ball_r):
+            element = {"frame": frame, "position": original_rect}
+            if (not rectangleContains(original_rect, ball_r)
+                    and not is_used(element, positive=False)):
                 # Add example to hard negatives list
                 h_neg = img_rgb[oY:oY+FIELD_SIZE, oX:oX+FIELD_SIZE]
+                found['no'].append(element)
                 hard_negatives.append(h_neg)
-            else:
+            elif rectangleContains(original_rect, ball_r):
+                # If any rectangle contains the ball,
+                # do not include this frame as hard positive
                 ball_is_shape = True
-        if not ball_is_shape:
+        if not ball_is_shape and not is_used(element, positive=True):
             x, y = get_ball_rectangle(ball_r)
             h_pos = img_rgb[y:y+FIELD_SIZE, x:x+FIELD_SIZE]
+            found['yes'].append(element)
             hard_positives.append(h_pos)
+    return hard_negatives, hard_positives
+
+
+def example_extraction(model_path, dataset, referenceImages):
+    global found, included
+    model = tf.keras.models.load_model(model_path, compile=False)
+    print("Model " + model_path + " successfully loaded")
+
+    it_regex = r'it(\d+)(.+?)\.'
+    match = re.match(it_regex, os.path.basename(model_path))
+    iteration = match.group(1)
+    name = match.group(2)
+
+    # Create directories for hard negative examples, model and iteration
+    # in case they dont already exist
+    if not os.path.exists("hnmData"):
+        os.mkdir("hnmData")
+    if not os.path.exists(os.path.join("hnmData", name)):
+        os.mkdir(os.path.join("hnmData", name))
+    example_path = os.path.join("hnmData", name, 'it' + iteration)
+    json_path = os.path.join(example_path, "included.json")
+
+    if not os.path.exists(example_path):
+        print("Creating " + example_path + " folder.")
+        os.mkdir(example_path)
+    elif os.path.exists(json_path):
+        with open(json_path, 'r') as f:
+            included = json.load(f)
+            found = included
+
+    print("Calculating hard negatives and positives...")
+    hard_negatives, hard_positives = get_hard_examples(model)
 
     # Once we have every example, pick a sample sized
     # as a fraction of original dataset and save it in the directory
 
-    print("Introducing hard positives into dataset")
-    introduce_new_examples(example_path, hard_positives, True)
     print("Introducing hard negatives into dataset")
-    introduce_new_examples(example_path, hard_negatives, False)
+    selecintr_new_examples(dataset, example_path,
+                           iteration, hard_negatives, False)
+    print("Introducing hard positives into dataset")
+    selecintr_new_examples(dataset, example_path,
+                           iteration, hard_positives, True)
+
+    # Dump included dict to json for future iterations
+    with open(json_path, "w") as f:
+        json.dump(included, f)
+
+
+def main():
+    args = hnmex_args()
+    # Check directories passed by argument
+    if not os.path.exists(args.model):
+        sys.exit("Model " + args.model + " does not exist")
+    if not os.path.exists(args.refs):
+        sys.exit("Path " + args.refs + " directory does not exist")
+    if not os.path.exists(args.data):
+        sys.exit("Path " + args.data + " directory does not exist")
+
+    example_extraction(args.model, args.data, args.refs)
 
 
 if __name__ == '__main__':

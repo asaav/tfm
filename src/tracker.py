@@ -38,14 +38,17 @@ def scale_image(img, factor):
 
 
 def main():
+    img_array = []
     while cap.isOpened():
         ret, frame = cap.read()
-        scaled, width, height = scale_image(frame, args.scale)
-        frame_rgb = cv2.cvtColor(scaled, cv2.COLOR_BGR2RGB)
         if ret:
+            scaled, width, height = scale_image(frame, args.scale)
+            frame_rgb = cv2.cvtColor(scaled, cv2.COLOR_BGR2RGB)
             img = model.predict(np.expand_dims(frame_rgb, axis=0))
             img = np.squeeze(img, axis=0)
-
+            kernel = np.ones((5, 5), np.uint8)
+            img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+            img_array.append((img*255).astype(np.uint8))
             # ret, thresh1 = cv2.threshold(img, 254, 255, cv2.THRESH_BINARY)
 
             cv2.imshow('test', img)
@@ -61,6 +64,13 @@ def main():
         elif key == ord('l'):
             time = cap.get(cv2.CAP_PROP_POS_MSEC)
             cap.set(cv2.CAP_PROP_POS_MSEC, time + 5000)
+    h, w = img_array[0].shape
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    out = cv2.VideoWriter("test.avi", fourcc, 30.0, (w, h), False)
+
+    for img in img_array:
+        out.write(img)
+    out.release()
 
 
 if __name__ == "__main__":

@@ -70,23 +70,16 @@ def train_test_model(model, dataset):
     return ev_model, accuracy
 
 
-def main():
-    args = hnmin_args()
-    if os.path.exists(args.model):
-        train_model, ev_model = get_fcnfMnist()
-        train_model.load_weights(args.model)
-        print("Model " + args.model + " successfully loaded")
-    else:
-        sys.exit("Model " + args.model + " does not exist")
-
-    if not os.path.exists(args.data):
-        sys.exit(args.data + " does not exist")
+def continue_training(model_path, data):
+    train_model, ev_model = get_fcnfMnist()
+    train_model.load_weights(model_path)
+    print("Model " + model_path + " successfully loaded")
     it_regex = r'(it(\d+))(.+?)\.'
-    match = re.match(it_regex, os.path.basename(args.model))
+    match = re.match(it_regex, os.path.basename(model_path))
     iteration = match.group(1)
     it_number = int(match.group(2))
     name = match.group(3)
-    datasetPath = os.path.join(args.data, name, iteration)
+    datasetPath = os.path.join(data, name, iteration)
     if not os.path.exists(datasetPath):
         sys.exit(datasetPath + " does not exist")
 
@@ -94,6 +87,16 @@ def main():
     model_path = os.path.join("models", f'it{it_number+1}{name}.h5')
     print("Saving model in " + model_path)
     model.save(model_path)
+
+
+def main():
+    args = hnmin_args()
+    if not os.path.exists(args.model):
+        sys.exit("Model " + args.model + " does not exist")
+
+    if not os.path.exists(args.data):
+        sys.exit(args.data + " does not exist")
+    continue_training(args.model, args.data)
 
 
 if __name__ == '__main__':

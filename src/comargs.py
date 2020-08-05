@@ -50,11 +50,9 @@ def tracker_args():
 
 def hnmex_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--scale", type=restricted_float,
-                        help="scale factor", default=1)
     parser.add_argument("-m", "--model", help="model location")
     parser.add_argument("-d", "--data", help="dataset location")
-    parser.add_argument("-n", "--hardNegatives", help="hard negative sources")
+    parser.add_argument("-r", "--refs", help="hard negative/positive sources")
     return parser.parse_args()
 
 
@@ -62,6 +60,18 @@ def hnmin_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", help="model location")
     parser.add_argument("-d", "--data", help="dataset location")
+    return parser.parse_args()
+
+
+def retrain_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("model", help="model location")
+    parser.add_argument("-r", "--refs", help="hard negative/positive sources",
+                        default="hardNegatives/")
+    parser.add_argument("-i", "--iterations", default=5, type=int,
+                        help="number of iterations to be done")
+    parser.add_argument("-d", "--data", default="dataset/",
+                        help="dataset location (first iteration)")
     return parser.parse_args()
 
 

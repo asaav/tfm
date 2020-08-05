@@ -47,7 +47,7 @@ def get_fcnfMnist():
     entrada = Input(shape=(None, None, 3))
     x = Conv2D(64, (5, 5), padding="same", activation="relu")(entrada)
     x = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="valid")(x)
-    x = Conv2D(128, (3, 3), activation="relu", padding="same")(x)
+    x = Conv2D(256, (3, 3), activation="relu", padding="same")(x)
     x = Conv2D(128, (3, 3), activation="relu", padding="same")(x)
     x = MaxPooling2D(pool_size=(2, 2), padding="valid")(x)
     x = Conv2D(32, (13, 13), activation="relu", padding="valid")(x)

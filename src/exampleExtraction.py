@@ -20,20 +20,20 @@ def scale_image(img, factor):
 
 def main():
     img = None
+    raw = None
 
     def mouse_events(event, x, y, flags, params):
         positive_examples = len([name for name in os.listdir(
             './yes') if os.path.isfile('./yes/' + name)])
         negative_examples = len([name for name in os.listdir(
             './no') if os.path.isfile('./no/' + name)])
-        region = img[y - WSIZE//2:y+WSIZE + WSIZE //
+        region = raw[y - WSIZE//2:y+WSIZE + WSIZE //
                      2, x-WSIZE//2:x+WSIZE + WSIZE//2]
-        img_cloned = img.copy()
         if event == cv2.EVENT_MOUSEMOVE:
-            cv2.rectangle(img_cloned, (x-WSIZE//2, y-WSIZE//2),
+            cv2.rectangle(img, (x-WSIZE//2, y-WSIZE//2),
                           (x+WSIZE + WSIZE//2, y+WSIZE + WSIZE//2),
                           (0, 255, 0))
-            cv2.imshow("capture", img_cloned)
+            cv2.imshow("original", img)
         if event == cv2.EVENT_LBUTTONDOWN:
             cv2.imwrite('./yes/' + str(positive_examples + 1) + '.png', region)
         if event == cv2.EVENT_MBUTTONDOWN:
@@ -55,20 +55,22 @@ def main():
 
             # read frame
             ret, frame = cap.read()
+            img = frame.copy()
+            raw = frame.copy()
 
             if ret:
-                # scale image
-                frame, _, _ = scale_image(frame, args.scale)
                 cv2.imshow('original', frame)
-        img = frame
+                cv2.setMouseCallback('original', mouse_events)
+            elif frame is not None:
+                cv2.imshow('original', frame)
+        else:
+            img = frame.copy()
+            raw = frame.copy()
+            cv2.imshow('original', frame)
         # end video if q is pressed or no frame was read
         key = cv2.waitKey(20)
         if (key == ord('q')) or (not ret):
             break
-        elif key == ord('c'):
-            play_video = False
-            cv2.imshow('capture', img)
-            cv2.setMouseCallback('capture', mouse_events)
         # space to pause
         elif key == ord(' '):
             play_video = not play_video
