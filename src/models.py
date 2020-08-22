@@ -51,7 +51,7 @@ def get_fcnfMnist():
     x = Conv2D(128, (3, 3), activation="relu", padding="same")(x)
     x = MaxPooling2D(pool_size=(2, 2), padding="valid")(x)
     x = Conv2D(32, (13, 13), activation="relu", padding="valid")(x)
-    x = Dropout(0.4)(x)
+    #x = Dropout(0.4)(x)
     res = Conv2D(1, (1, 1), activation="sigmoid", padding="valid")(x)
     training_res = Reshape((-1, 1))(res)
 

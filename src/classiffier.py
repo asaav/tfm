@@ -66,7 +66,7 @@ def train_test_model():
     train_model = None
     ev_model = None
     if architecture == "AlexNet":
-        train_model = models.get_AlexNet()
+        train_model = models.get_AlexNet(lr=1e-4)
         ev_model = train_model
     elif architecture == "MNIST":
         train_model = models.get_fMnist()
@@ -84,7 +84,7 @@ def train_test_model():
 
     # Compile and train model with EarlyStopping
     train_model.compile(
-        optimizer="adam",
+        optimizer=tf.keras.optimizers.Adam(),
         loss='binary_crossentropy',
         metrics=['accuracy']
     )
@@ -95,6 +95,7 @@ def train_test_model():
     )
 
     train_model.fit(dataset_train, epochs=1000, validation_data=dataset_val,
+                    class_weight={0: 1., 1: 2.5},
                     callbacks=[early_stopping, tensorboard_cb])
 
     # Print confusion matrix after training
@@ -110,7 +111,7 @@ def train_test_model():
 
 
 def main():
-    model, acc = train_test_model()
+    model, _ = train_test_model()
     if comargs.query_yes_no("Save model?"):
         model.save("models/" + args.architecture + ".h5")
 

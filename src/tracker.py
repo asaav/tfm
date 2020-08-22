@@ -48,8 +48,8 @@ def main():
             img = np.squeeze(img, axis=0)
             kernel = np.ones((5, 5), np.uint8)
             img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
-            img_array.append((img*255).astype(np.uint8))
-            # ret, thresh1 = cv2.threshold(img, 254, 255, cv2.THRESH_BINARY)
+            img_array = (img*255).astype(np.uint8)
+            #ret, img = cv2.threshold(img_array, 200, 255, cv2.THRESH_BINARY)
 
             cv2.imshow('test', img)
             cv2.imshow('org', scaled)
@@ -64,6 +64,9 @@ def main():
         elif key == ord('l'):
             time = cap.get(cv2.CAP_PROP_POS_MSEC)
             cap.set(cv2.CAP_PROP_POS_MSEC, time + 5000)
+        elif key == ord('c'):
+            cv2.imwrite("img.png", img_array)
+            cv2.imwrite("original.png", scaled)
     h, w = img_array[0].shape
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     out = cv2.VideoWriter("test.avi", fourcc, 30.0, (w, h), False)
