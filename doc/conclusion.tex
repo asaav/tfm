@@ -5,8 +5,43 @@ En general, aunque el resultado del detector desde 0 no es tan bueno como se pre
 
 \subsection{Conclusiones sobre el proyecto}
 
-En este trabajo se ha propuesto principalmente la obtención, a partir de un problema real, de un dataset capaz de entrenar un modelo de red neuronal que pueda detectar la presencia de un balón en la escena
+En este trabajo se ha propuesto principalmente la obtención, a partir de un problema real, de un dataset capaz de entrenar un modelo de red neuronal que pueda detectar la presencia de un balón en la escena. El segundo objetivo del proyecto era que el modelo resultante fuera capaz de realizar un seguimiento (\textit{tracking}) del balón mediante detección desde cero en todos los frames de un vídeo. Las imágenes utilizadas para el dataset han sido obtenidas de una cámara instalada en el pabellón Eduardo Linares de Molina de Segura con vista cenital. La totalidad del desarrollo se ha realizado en Python, utilizando las librerías Tensorflow para las tareas de entrenamiento del modelo y OpenCV para la obtención de ejemplos e interpretación de la salida del modelo.
+
+Tras una prueba inicial de un modelo generalista como es GOTURN concluimos que este enfoque no es suficiente para solucionar el problema propuesto por lo que, efectivamente, se debía entrenar un modelo propio.
+
+La obtención del dataset fue un proceso mayormente manual aunque se pudo automatizar (hasta cierto grado) la obtención de ejemplos. La parte automática se extrajo de mi TFG, utilizando el detector de balón desarrollado. Sin embargo, dado que la detección en ese trabajo utilizaba sustracción de fondo, los solapamientos entre balón y jugadoras no era detectado, además de que la identificación del balón fallaba en ocasiones, por lo que el resto de imágenes se obtuvieron de forma manual cuidando que la casuística tanto de imágenes con balón y sin balón fuera suficientemente completa.
+
+Tras una limpieza de datos, el dataset logrado contiene un total de 9536 imágenes de las cuales 6961 son negativas y 2565 positivas. Además de esto, para ayudar al algoritmo a aprender las características relevantes, se aplica la técnica de Data Augmentation.
+
+El modelo seleccionado, un modelo de red neuronal completamente convolucional (FCN), obtuvo con los parámetros por defecto una precisión superior al 97\% sobre el conjunto de test. Una vez ajustados los parámetros del \textit{learning rate} y los pesos asignados a cada clase, el modelo obtuvo una precisión del 99\%. Aunque la precisión mejora tras el ajuste de parámetros, hay un cierto problema con los falsos positivos.
+
+Con la intención de solucionar este problema se aplicó la técnica de Hard Negative Mining, la cual consiste en obtener los errores del algoritmo y reutilizarlos para reentrenar el modelo en un proceso iterativo. Tras este procedimiento, se consiguió mejorar el problema, manteniendo la detección de positivos en valores deseables.
+
+Para evaluar el modelo, se ha utilizado una estimación de la cantidad de frames en los que el modelo es capaz de seguir al balón, en lugar de la métrica más utilizada en este tipo de problemas que es Intersection over Union (IoU), ya que esto requiere de un etiquetado frame a frame de todos los vídeos de que disponemos. 
+
+%%%% TODO: parrafo sobre el rendimiento final %%%%
+
+
 
 \subsubsection*{Balance de objetivos}
 
+Este proyecto ha abarcado la totalidad de fases de un proyecto típico de \textit{deep learning}: desde la obtención de los datos hasta la obtención de un modelo depurado, pasando por el ajuste de parámetros de dicho modelo y la limpieza del dataset. La prioridad principal era la obtención de dicho dataset, sin utilizar ninguno de los (numerosos) datasets disponibles en Internet.
+
+En este sentido, podemos afirmar que el dataset obtenido es suficientemente bueno como para conseguir un modelo con un 99\% de precisión en la detección de balón en las imágenes de entrenamiento de 56x56. Sin embargo, el rendimiento del modelo en sí sobre un vídeo real nos deja claro que la detección desde cero en un problema con estas características no es posible.
+
+Si bien es cierto que el modelo no tiene un rendimiento perfecto, hay que tener en cuenta que hay una dificultad intrínseca a ciertos frames de los vídeos que es difícil de salvar debido a varios motivos, entre los cuales encontramos limitaciones técnicas como la tasa de frames de la cámara y la calidad de la imagen y otros motivos más propios del problema como son la velocidad del balón en los golpeos o la similitud de algunos objetos con el balón en tamaño y color desde la distancia a la que está la cámara (zapatos, camisetas...).
+
+En resumen, el modelo final, aunque satisfactorio, arrastra una serie de fallos inevitables debido a la dificultad intrínseca del problema y que para solucionarlos se necesita de un cambio de enfoque, que explicaremos en la sección de vías futuras. Por lo tanto el balance es positivo respecto a los objetivos que nos planteábamos, pero queda un espacio amplio de mejoras disponible de cara al futuro.
+
+
+
 \subsection{Vías Futuras}
+
+Durante el desarrollo del proyecto se han ido abriendo diversidad de vías de futuro desarrollo y mejora de este que, por falta de tiempo o por quedar fuera del alcance del trabajo no se han realizado. Estas mejoras son:
+
+\begin{itemize}
+    \item Utilización de algún tipo de modelo de consistencia temporal que utilice la información de la localización del balón en frames anteriores para calcular la posición en futuros frames. En caso de usar un modelo ya establecido podrían utilizarse filtros de Kalman \cite{Thrun:2005:PR:1121596}, modelos de Markov o red neuronal recursiva.
+    \item Utilización de alguna herramienta de etiquetado de frames \cite{dutta2016via} para hacer un etiquetado frame a frame de todo el metraje de vídeos y extraer imágenes de entrenamiento que permitan tratar el problema como uno de segmentación visual.
+    \item En línea con lo anterior, se podría utilizar un modelo ya establecido para segmentación visual, como puedan ser YOLO (en cualquiera de sus versiones \cite{art:yolo,art:yolo2,art:yolo3}) o R-CNN, que también cuenta con 3 versiones principales \cite{art:RCNN, art:fastRCNN, art:fasterRCNN}.
+    \item Obtención de vídeo de mayor resolución y tasa de frames, que ayude al modelo a la hora tanto de entrenar como para predecir los frames del vídeo.
+\end{itemize}
