@@ -1,27 +1,7 @@
 @misc{ wiki:hawk,
-author = "{Wikipedia contributors}",
-title = "Hawk-Eye --- {Wikipedia}{,} The Free Encyclopedia",
-year = "2018",
-howpublished = "\url{https://en.wikipedia.org/wiki/Hawk-Eye}",
-note = "[Online; consultada 14-04-2018]"
-}
-
-
-@misc{ wiki:python,
-author = "{Wikipedia contributors}",
-title = "Python (programming language) --- {Wikipedia}{,} The Free Encyclopedia",
-year = "2018",
-howpublished = "\url{https://en.wikipedia.org/wiki/Python_(programming_language)}",
-note = "[Online; consultado 14-04-2018]"
-}
-
-
-@misc{ wiki:opencv,
-author = "{Wikipedia contributors}",
-title = "OpenCV --- {Wikipedia}{,} The Free Encyclopedia",
-year = "2018",
-howpublished = "\url{https://en.wikipedia.org/wiki/OpenCV}",
-note = "[Online; consultado 14-04-2018]"
+author = {Hawk-Eye Innovations},
+title = {Electronic Line Calling Technology: How it Works},
+howpublished = "\url{https://resources.platform.pulselive.com/HawkEye/document/2016/08/15/1e6cdaa4-2b70-4975-b722-7dca82b8e546/ELC_How_it_Works.pdf}"
 }
 
 @book{ book:szeliski,
@@ -239,12 +219,20 @@ note = "[Online; consultada 26-06-2018]"
   month={Jan}
 }
 
-@misc{ wiki:meanshift,
-author = "{Rachid Belaroussi}",
-title = "Detección de moda en una densidad {2D} mediante {Mean Shift}",
-year = "2018",
-howpublished = "\url{https://commons.wikimedia.org/wiki/File:Meanshiftred.gif#/media/File:Meanshiftred.gif}",
-note = "[Online; consultada 06-08-2018]"
+@MISC{camshift,
+    author = {Gary R. Bradski},
+    title = {Computer Vision Face Tracking For Use in a Perceptual User Interface},
+    year = {1998}
+}
+
+@ARTICLE{meanshift,
+  author={K. {Fukunaga} and L. {Hostetler}},
+  journal={IEEE Transactions on Information Theory}, 
+  title={The estimation of the gradient of a density function, with applications in pattern recognition}, 
+  year={1975},
+  volume={21},
+  number={1},
+  pages={32-40}
 }
 
 @misc{ wiki:camshift,
@@ -385,26 +373,29 @@ note = "[Online; consultada 06-08-2018]"
   month={Jul}
 }
 
-@misc{art:yolo3,
-  title={YOLOv3: An Incremental Improvement},
-  author={Joseph Redmon and Ali Farhadi},
-  year={2018},
-  eprint={1804.02767},
-  archivePrefix={arXiv},
-  primaryClass={cs.CV}
+@article{art:yolo3,
+  title={Yolov3: An incremental improvement},
+  author={Redmon, Joseph and Farhadi, Ali},
+  journal={arXiv preprint arXiv:1804.02767},
+  year={2018}
 }
 
-@misc{art:tan2019efficientdet,
-  title={EfficientDet: Scalable and Efficient Object Detection},
-  author={Mingxing Tan and Ruoming Pang and Quoc V. Le},
-  year={2019},
-  eprint={1911.09070},
-  archivePrefix={arXiv},
-  primaryClass={cs.CV}
+
+@article{Tan_2020,
+   title={EfficientDet: Scalable and Efficient Object Detection},
+   ISBN={9781728171685},
+   url={http://dx.doi.org/10.1109/cvpr42600.2020.01079},
+   DOI={10.1109/cvpr42600.2020.01079},
+   journal={2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+   publisher={IEEE},
+   author={Tan, Mingxing and Pang, Ruoming and Le, Quoc V.},
+   year={2020},
+   month={Jun}
 }
+
 
 @article{art:DeepBall,
-  title={DeepBall: Deep Neural-Network Ball Detector},
+  title={Deep{B}all: Deep Neural-Network Ball Detector},
   ISBN={9789897583544},
   url={http://dx.doi.org/10.5220/0007348902970304},
   DOI={10.5220/0007348902970304},
@@ -425,46 +416,8 @@ title={ {TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
 url={https://www.tensorflow.org/},
 note={Software available from tensorflow.org},
 author={
-Mart\'{\i}n~Abadi and
-Ashish~Agarwal and
-Paul~Barham and
-Eugene~Brevdo and
-Zhifeng~Chen and
-Craig~Citro and
-Greg~S.~Corrado and
-Andy~Davis and
 Jeffrey~Dean and
-Matthieu~Devin and
-Sanjay~Ghemawat and
-Ian~Goodfellow and
-Andrew~Harp and
-Geoffrey~Irving and
-Michael~Isard and
-Yangqing Jia and
-Rafal~Jozefowicz and
-Lukasz~Kaiser and
-Manjunath~Kudlur and
-Josh~Levenberg and
-Dandelion~Man\'{e} and
-Rajat~Monga and
-Sherry~Moore and
-Derek~Murray and
-Chris~Olah and
-Mike~Schuster and
-Jonathon~Shlens and
-Benoit~Steiner and
-Ilya~Sutskever and
-Kunal~Talwar and
-Paul~Tucker and
-Vincent~Vanhoucke and
-Vijay~Vasudevan and
-Fernanda~Vi\'{e}gas and
-Oriol~Vinyals and
-Pete~Warden and
-Martin~Wattenberg and
-Martin~Wicke and
-Yuan~Yu and
-Xiaoqiang~Zheng},
+Rajat~Monga et al.},
 year={2015},
 }
 
@@ -481,13 +434,11 @@ year={2015},
   pages={749–765}
 }
 
-@misc{art:xiao2017fashionmnist,
-  title={Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms},
-  author={Han Xiao and Kashif Rasul and Roland Vollgraf},
-  year={2017},
-  eprint={1708.07747},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG}
+@article{art:xiao2017fashionmnist,
+  title={Fashion-{MNIST}: a novel image dataset for benchmarking machine learning algorithms},
+  author={Xiao, Han and Rasul, Kashif and Vollgraf, Roland},
+  journal={arXiv preprint arXiv:1708.07747},
+  year={2017}
 }
 
 @MISC{kaggleIoU,
@@ -506,30 +457,70 @@ year={2015},
   note = "Online; consultado: 24-08-2020"
 }
 
-@misc{art:RCNN,
-    title={Rich feature hierarchies for accurate object detection and semantic segmentation},
-    author={Ross Girshick and Jeff Donahue and Trevor Darrell and Jitendra Malik},
-    year={2013},
-    eprint={1311.2524},
-    archivePrefix={arXiv},
-    primaryClass={cs.CV}
+@inproceedings{art:RCNN,
+  title={Rich feature hierarchies for accurate object detection and semantic segmentation},
+  author={Girshick, Ross and Donahue, Jeff and Darrell, Trevor and Malik, Jitendra},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={580--587},
+  year={2014}
 }
 
-@misc{art:fastRCNN,
-    title={Fast R-CNN},
-    author={Ross Girshick},
-    year={2015},
-    eprint={1504.08083},
-    archivePrefix={arXiv},
-    primaryClass={cs.CV}
+@inproceedings{art:fastRCNN,
+  title={Fast {R-CNN}},
+  author={Girshick, Ross},
+  booktitle={Proceedings of the IEEE international conference on computer vision},
+  pages={1440--1448},
+  year={2015}
 }
 
-@misc{art:fasterRCNN,
-    title={Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks},
-    author={Shaoqing Ren and Kaiming He and Ross Girshick and Jian Sun},
-    year={2015},
-    eprint={1506.01497},
-    archivePrefix={arXiv},
-    primaryClass={cs.CV}
+
+@inproceedings{art:fasterRCNN,
+  title={Faster {R-CNN}: Towards real-time object detection with region proposal networks},
+  author={Ren, Shaoqing and He, Kaiming and Girshick, Ross and Sun, Jian},
+  booktitle={Advances in neural information processing systems},
+  pages={91--99},
+  year={2015}
 }
 
+@article{tfg,
+  author={Antonio Saavedra Sánchez},
+  title={{TFG}: Seguimiento visual automatizado de eventos en deportes de equipo},
+  journal={Facultad de Informática},
+  year={2018}
+}
+
+@article{byerly2020branching,
+  title={A branching and merging convolutional network with homogeneous filter capsules},
+  author={Byerly, Adam and Kalganova, Tatiana and Dear, Ian},
+  journal={arXiv preprint arXiv:2001.09136},
+  year={2020}
+}
+
+@misc{deepFake,
+  title = {New Steps to Combat Disinformation},
+  author = {Tom Burt and Eric Horvitz},
+  howpublished = {\url{https://blogs.microsoft.com/on-the-issues/2020/09/01/disinformation-deepfakes-newsguard-video-authenticator/}}
+}
+
+@misc{volleyDeep,
+  title = {Ball tracking in volleyball with OpenCV and Tensorflow},
+  author = {Constantin Toporov},
+  howpublished = {\url{https://towardsdatascience.com/ball-tracking-in-volleyball-with-opencv-and-tensorflow-3d6e857bd2e7}}
+}
+
+@article{AlphaZero,
+author = {Silver, David and Hubert, Thomas and Schrittwieser, Julian and Antonoglou, Ioannis and Lai, Matthew and Guez, Arthur and Lanctot, Marc and Sifre, Laurent and Kumaran, Dharshan and Graepel, Thore and Lillicrap, Timothy and Simonyan, Karen and Hassabis, Demis},
+year = {2018},
+month = {12},
+pages = {1140-1144},
+title = {A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play},
+volume = {362},
+journal = {Science},
+doi = {10.1126/science.aar6404}
+}
+
+@misc{mathWorksCnn,
+  title = {Introduction to Deep Learning: What Are Convolutional Neural Networks?},
+  author = {Shyamal Patel and Johanna Pingel},
+  howpublished = {\url{https://www.mathworks.com/videos/introduction-to-deep-learning-what-are-convolutional-neural-networks--1489512765771.html}}
+}

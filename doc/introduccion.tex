@@ -1,18 +1,19 @@
 \section{Introducción}
+
 \subsection{¿Qué es la visión artificial?}
 
-Los seres humanos somos capaces de percibir con facilidad el entorno tridimensional que nos rodea. Durante décadas, el funcionamiento de nuestra visión ha sido fruto de extensivo estudio por parte de psicólogos de la percepción, pero aún no se conoce el funcionamiento de manera exacta  \cite{book:szeliski}.
+Los seres humanos somos capaces de percibir con facilidad el entorno tridimensional que nos rodea \cite{tfg}. El funcionamiento exacto de nuestra visión (y, asimismo, de nuestro cerebro)  ha sido fruto de investigación exhaustiva por parte de la comunidad científica \cite{book:szeliski}. Psicología, oftalmología, neurociencia e incluso ingeniería son algunas de las ramas que investigan sobre nuestra visión sin, de momento, llegar a una respuesta concluyente.
 
-Paralelamente, los investigadores en visión artificial han desarrollado técnicas matemáticas para, a partir de imágenes, reconstruir la apariencia tridimensional de objetos. Actualmente somos capaces de, entre otras cosas, generar un modelo 3D parcial de un entorno a partir de miles de fotografías solapadas, seguir el movimiento de una persona sobre un fondo complejo y, con moderado éxito, reconocer y nombrar a las personas de una fotografía a partir de características como el pelo, la cara o la ropa. Entre otras aplicaciones más avanzadas se encuentran detectar y clasificar objetos o elaborar descripciones verbales a partir de imágenes o vídeos.
+La idea de visión artificial surge a finales de la década de los 60. Desde entonces, se han desarrollado técnicas matemáticas para todo tipo de aplicaciones. En la actualidad, entre las aplicaciones más avanzadas se encuentra el reconocimiento, detección y clasificación de objetos o elaboración de descripciones verbales utilizando imágenes.
 
-Sin embargo, a pesar de estos avances, hacer que un ordenador sea capaz de interpretar una imagen al mismo nivel que lo haría un niño sigue siendo un sueño sin cumplir. La dificultad del problema que nos ocupa suele ser subestimada, ya que se suele tender a pensar que las partes difíciles de la inteligencia artificial son las cognitivas y no las relativas a la percepción.
+A pesar de estos avances, la tarea de hacer que un ordenador llegue al nivel perceptivo de un niño sigue siendo un objetivo más bien lejano. La dificultad de la visión por computador es, en ocasiones, subestimada. Se suele tender a pensar que la parte más complicada de un sistema de inteligencia artificial son las partes cognitivas y no las relativas a la percepción, aunque tienen dificultades similares entre sí.
 
-Pero, ¿qué es lo que hace tan difícil la visión por computador? En parte es que, dado nuestro desconocimiento del funcionamiento de nuestra visión, es un \textit{problema inverso}: dada una cantidad insuficiente de información (una imagen o un video), tratamos de llegar a las incógnitas que nos permiten especificar una solución completa. Es decir, a partir de una imagen, tratamos de reconstruir no sólo las propiedades de los objetos que allí aparecen (como su forma, iluminación, color o posición), sino también el reconocimiento (clasificación o etiquetado de dichos objetos), la separación del resto de la escena (segmentación), etc.
+La dificultad de la visión artificial radica, de hecho, en nuestro desconocimiento del funcionamiento de la nuestra. Esto lo convierte en un problema más bien de ingeniería inversa: utilizando una cantidad de información insuficiente, como una imagen, se trata de llegar a las incógnitas que permiten encontrar la solución completa. En otras palabras, el objetivo es reconstruir no sólo las propiedades de los objetos (forma, iluminación, color...), sino también el reconocimiento (clasificación) de los objetos, la separación de unos objetos de otros (segmentación), etc.
 
 Ahora bien, no todo son malas noticias: la visión por computador tiene numerosos casos de uso hoy en día. Entre sus aplicaciones encontramos cosas como (\citeauthor*{book:szeliski}):
 \begin{itemize}
-  \item \textbf{Reconocimiento de caracteres óptico.} Se ha llegado a reconocer caracteres numéricos con una tasa de error del 0.23\% \cite{art:2012arXiv1202.2745C}.
-  \item \textbf{Inspección mecanizada.} Inspección de partes de automóviles o aeronaves a fin de, por ejemplo, encontrar defectos en el metal (Figura \ref{fig:apps1a}).
+  \item \textbf{Reconocimiento de caracteres óptico.} Se ha llegado a reconocer caracteres numéricos con una tasa de error del 0.16\% \cite{byerly2020branching}.
+  \item \textbf{Inspección mecanizada.} Inspección de partes de automóviles o aeronaves a fin de, por ejemplo, encontrar defectos en el metal o generación de modelos 3D a partir de escaneos (Figura \ref{fig:apps1a}).
   \item \textbf{Construcción de modelos 3D.} Construcción automatizada de modelos 3D a partir de fotografías aéreas como las que usa Google
         (Figura \ref{fig:apps1b}).
   \item \textbf{Seguridad en automóviles.} Reconocimiento de obstáculos tales como peatones u otros coches, en condiciones en las que el radar o el lídar no funcionan bien, en tecnologías como \href{https://www.mobileye.com/}{Mobileye}.
@@ -33,7 +34,7 @@ Ahora bien, no todo son malas noticias: la visión por computador tiene numeroso
     \caption { }
     \label{fig:apps1b}
   \end{subfigure}
-  \caption{Algunas aplicaciones de la visión artificial: (a) sistema de digitalizado por luz blanca \href{http://www.hexagonmi.com/es-ES/products/white-light-scanner-systems/hexagon-metrology-wls400a}{WLS400A}. (b) reconstrucción 3D en Google Maps de la Puerta del Sol. }
+  \caption{Algunas aplicaciones de la visión artificial: (a) sistema de escaneado de objetos por luz azul \href{https://www.hexagonmi.com/es-ES/products/white-light-scanner-systems/blaze-600a}{BLAZE 600A}. (b) reconstrucción 3D en Google Maps de la Puerta del Sol \cite{tfg}. }
   \label{fig:applications}
 \end{figure}
 
@@ -42,44 +43,41 @@ Ahora bien, no todo son malas noticias: la visión por computador tiene numeroso
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{images/timeline}
-  \caption{Timeline de las aportaciones más importantes a la visión artificial \cite{book:szeliski}.}
+  \caption{Timeline de las aportaciones más importantes a la visión artificial \cite{tfg, book:szeliski}.}
 \end{figure}
 
-La investigación en visión artificial comienza en la \textbf{década de los 70}. En esta época, los pioneros en el campo de la IA y la robótica creían que resolver el problema de la entrada visual sería un trabajo fácil hacia la resolución de problemas de mayor envergadura. De hecho, tanto es así, que en 1966 Marvin Minsky le asignó a su alumno en el MIT Gerald Jay Sussman un proyecto de verano que consistía en enlazar una cámara a un ordenador y que este describiera lo que veía.
+La primera vez que surge la idea de visión por computador es en 1966, cuando Marvin Minsky le asignó a su alumno en el MIT Gerald Jay Sussman un proyecto de verano en el que le encargó enlazar una cámara a un ordenador, haciendo que el ordenador describiera los objetos que se le presentaban a la cámara.
+
+En la siguiente década, \textbf{en los 70}, la investigación en visión artificial comienza a tomar forma. En esta época, los pioneros en el campo de la IA y la robótica creían que resolver el problema de la entrada visual sería un trabajo fácil hacia la resolución de problemas de mayor envergadura. 
 
 Lo que distinguió la visión por computador del campo del procesado de imágenes digitales fue la intención de reconstruir la estructura tridimensional del mundo a partir de las imágenes. Los primeros intentos en este sentido estaban relacionados con la extracción de ejes y posterior inferencia de la estructura 3D del objeto.
 
-En la \textbf{década de 1980} los esfuerzos se centraron en técnicas matemáticas mas sofisticadas para el análisis. Empiezan a usarse ampliamente técnicas como las pirámides de imágenes, y continuó la investigación en una mejor detección de bordes y contornos. Comienzan a adoptarse técnicas de detección de formas a partir de sombreado, textura, o enfoque. Posteriormente, algunos investigadores vieron que estas técnicas podían ser generalizadas usando el mismo modelo matemático si se planteaban como problemas de optimización. También aparecieron las primeras redes neuronales aplicadas al campo de la visión por computador.
+En \textbf{los 80} la investigación se centró en desarrollar técnicas matemáticas más sofisticadas para el análisis. Comienzan a usarse técnicas como las pirámides de imágenes. Se continuó con la investigación sobre la detección de bordes y contornos. Se empiezan a adoptar técnicas de detección de formas a partir de características de la imagen como las sombras, la textura o el enfoque. Estas técnicas fueron generalizadas utilizando el mismo modelo matemático al plantearlas como problemas de optimización. Aparecen también las primeras redes neuronales aplicadas a visión artificial.
 
-En la \textbf{década de 1990} continuó la investigación en todo lo anteriormente mencionado, pero algunos de los temas vieron un aumento en su actividad. Hubo un esfuerzo por solucionar el problema de la estructura a partir del movimiento. El trabajo comenzado en la década anterior consistente en usar medidas detalladas de color e intensidad en combinación con modelos físicos precisos acabó por crear su propio subcampo llamado visión basada en la física.
+En la \textbf{década de 1990} continuó la investigación en todo lo anteriormente mencionado. Hubo un esfuerzo por solucionar el problema de la estructura a partir del movimiento (\textit{structure from motion}). El trabajo de la década anterior que consistía en usar medidas color e intensidad en combinación con modelos físicos acabó por convertirse en su propio campo de investigación, llamado visión artificial basada en la física. Los algoritmos de \textit{tracking} mejoraron, surgen técnicas como \textit{mean shift}. Normalmente se aplicaron al seguimiento de caras o de cuerpos completos.
 
-Los algoritmos de \textit{tracking} mejoraron, incluidos los de tracking por contorno usando contornos activos, así como los basados en intensidad. Normalmente se aplicaron al seguimiento de caras o de cuerpos completos.
+La segmentación semántica de imágenes fue un tema de investigación activo. Comienzan a aparecer técnicas de aprendizaje basadas en estadística, de las que surgen los primeros algoritmos de reconocimiento facial.
 
-La segmentación de imagen fue un tema de investigación activo, y surgen técnicas como \textit{mean shift}. Comienzan a aparecer técnicas de aprendizaje basadas en la estadística, de las que surgen los primeros algoritmos de reconocimiento facial.
+El avance más notable en esta década fue la interacción con la computación gráfica. La idea de crear animaciones desde imágenes tomó forma mediante técnicas de \textit{morphing}. A la vez, empezaron a introducirse técnicas capaces de obtener un modelo 3D a partir de colecciones de imágenes.
 
-El avance más notable en esta década fue la interacción con la computación gráfica. La idea de manipular imágenes del mundo real para crear animaciones tomó forma mediante técnicas de \textit{morphing} y se aplicó después a técnicas de
-y creación de imágenes panorámicas. A la vez, empezaron a introducirse técnicas consistentes en crear modelos 3D a partir de colecciones de imágenes.
+Durante la \textbf{década de los 2000} continuó la interacción entre el campo de la visión y el de los gráficos. En esta década proliferaron técnicas basadas en el uso de \textit{features} para el reconocimiento de objetos. Estas técnicas también dominan otras tareas del reconocimiento como el reconocimiento de la escena o de localización.
 
-Durante la \textbf{década de los 2000} continuó la interacción entre el campo de la visión y el de los gráficos. Una tendencia de esta década fue la proliferación de técnicas basadas en \textit{features} para el reconocimiento de objetos. Estas técnicas también dominan otras tareas del reconocimiento como el reconocimiento de la escena o de localización.
+A finales de la década comienzan a aplicarse las técnicas de \textit{machine learning} a problemas de visión artificial, como es el uso de redes neuronales convolucionales. El crecimiento de esta técnica, de gran importancia en la actualidad, coincide con la gran disponibilidad en Internet de enormes cantidades de datos etiquetados, así como la multiplicación exponencial de la capacidad de cómputo, que hizo más rápido el diseño y testeo de modelos de redes neuronales.
 
-Otra tendencia, que sigue presente en la actualidad, es la aplicación de técnicas de \textit{machine learning} a problemas de visión artificial, como es el uso de redes neuronales convolucionales. El crecimiento de esta técnica coincide con la gran disponibilidad en Internet de enormes cantidades de datos etiquetados, así como la multiplicación de la capacidad de cómputo, lo que facilitó las tareas de aprendizaje.
-
-Al igual que en el campo del \textit{machine learning}, las redes neuronales han cobrado una importancia vital, y se ha logrado avances verdaderamente grandes haciendo uso de ellas. Un ejemplo del estado actual del campo es el trabajo de \citet{art:2017arXiv170306870H} que muestra el avance en segmentación de imagen que se ha logrado usando ANN (\textit{Artificial Neural Network}).
+Al igual que en el campo del \textit{machine learning}, las redes neuronales han cobrado una importancia vital, y se ha logrado avances verdaderamente grandes haciendo uso de ellas. Un ejemplo del estado actual del campo es el trabajo de \citet{art:2017arXiv170306870H} que muestra el avance en segmentación de imagen que se ha logrado usando ANNs (\textit{Artificial Neural Networks}).
 
 También hay avances en la conducción autónoma usando visión por computador, de hecho NVIDIA tiene actualmente en funcionamiento una plataforma para coches autónomos llamada NVIDIA DRIVE. Dicha plataforma, nuevamente, hace uso de técnicas de deep learning para detectar obstáculos, señales, etc.
 
 \subsection{El \textit{deep learning} y su aportación a la visión artificial}
 \subsubsection*{Orígenes de las ANN}
 
-El término \textit{deep learning} se refiere al conjunto de técnicas basadas en redes neuronales que permiten a un ordenador aprender a resolver una tarea concreta mediante el aprendizaje automático. En esencia, es una forma de \textit{machine learning}. Dichas redes neuronales, permiten crear modelos capaces de extraer \textit{features} abstractas de alto nivel, como pueden ser caras, voces o coches, a partir de conceptos más sencillos como el color, los contornos o las esquinas (\citet{book:Goodfellow-et-al-2016}).
+El término \textit{deep learning} se refiere al conjunto de técnicas basadas en redes neuronales que permiten a un ordenador aprender a resolver una tarea concreta mediante el aprendizaje automático. En esencia, es una forma de \textit{machine learning}. Dichas redes neuronales permiten crear modelos capaces de extraer \textit{features} abstractas de alto nivel, como pueden ser caras, voces o coches, a partir de conceptos más sencillos como el color, los contornos o las esquinas (\citet{book:Goodfellow-et-al-2016}).
 
 El concepto de red neuronal no es en absoluto novedoso, ya en 1943 el neurólogo Warren McCulloch y el matemático Walter Pitts las propusieron en un artículo \cite{art:mcculloch1943logical} en el que se presentaba un modelo computacional de cómo las neuronas biológicas funcionaban en conjunto para realizar cálculos complejos utilizando lógica proposicional.
 
-Los éxitos iniciales de las ANN llevaron a la creencia de que la IA era inminente. Sin embargo, en los años 60 se vio que esto no iba a ocurrir pronto, así que las ANN quedaron en espera hasta los años 80, cuando se desarrollaron nuevas arquitecturas y técnicas de entrenamiento que llevaron a revivir el interés. En los años 90 se propusieron técnicas de machine learning como las máquinas de soporte vectorial (SVM), las cuales ofrecían mejores resultados (y más comprensibles) que las redes neuronales, así que volvieron a caer en el olvido.
+Los éxitos iniciales de las ANN llevaron a la creencia de que una IA plena era inminente. Sin embargo, en los años 60 se vio que esto no iba a ocurrir pronto, así que las ANN quedaron en espera hasta los años 80, cuando se desarrollaron nuevas arquitecturas y técnicas de entrenamiento que llevaron a revivir el interés. En los años 90 se propusieron técnicas de machine learning como las máquinas de soporte vectorial (SVM), las cuales ofrecían mejores resultados (y más comprensibles) que las redes neuronales, así que volvieron a caer en el olvido.
 
-En las dos últimas décadas ha habido una nueva oleada de interés por las redes neuronales, la cual parece diferente a las anteriores en cuanto a las circunstancias en las que se produce (actualmente tenemos una cantidad de datos ingente, mejor capacidad de procesamiento y mejores algoritmos de entrenamiento), así que podría ser la definitiva \cite{book:homl}.
-
-El ejemplo más típico de un modelo \textit{deep learning} es el perceptrón multicapa (MLP, figura \ref{fig:mlp}), el cual consiste en una serie de ``neuronas'' conectadas entre sí a través de una o más capas. Cada una de dichas neuronas, en realidad es una función matemática que en la última capa produce una salida, la cual se utiliza en un proceso denominado \textit{backpropagation}. El objetivo del proceso es reajustar los pesos de cada uno de los perceptrones o neuronas que se hallan en el modelo, de forma que se reduzca el error en sucesivas iteraciones. Este algoritmo se propuso en 1987 \cite{art:backpropagation} y sigue siendo utilizado hoy en día.
+En las dos últimas décadas ha habido una nueva oleada de interés por las redes neuronales, que podría ser la definitiva debido a varios factores. Primero, la gran cantidad de datos disponible para el entrenamiento de este tipo de modelos disponible en abierto en Internet, junto con el aumento de la capacidad de procesamiento, en gran parte porque la industria del videojuego ha estimulado la producción de cada vez mejores GPUs, que aceleran mucho el entrenamiento de este tipo de modelos. Gracias a estos factores, las redes neuronales han entrado en un circulo virtuoso donde los éxitos generan más interés, que se traduce en mayor financiación, que a su vez llevan a nuevos progresos.
 
 \begin{figure}[H]
   \centering
@@ -88,24 +86,45 @@ El ejemplo más típico de un modelo \textit{deep learning} es el perceptrón mu
   \label{fig:mlp}
 \end{figure}
 
+El ejemplo más típico de un modelo \textit{deep learning} es el perceptrón multicapa (MLP, figura \ref{fig:mlp}), el cual consiste en una serie de una serie de nodos conectados entre sí a través de una o más capas, denominados neuronas. Cada una de dichas neuronas es, en realidad, una función matemática que, en la última capa, produce una salida. Esta salida se utiliza en un proceso denominado retropropagación (\textit{backpropagation}) del error cuyo objetivo es el de reajustar los pesos de cada uno de los perceptrones o neuronas que se hallan en el modelo, de forma que se reduzca el error en sucesivas iteraciones. Este algoritmo se propuso en 1987 \cite{art:backpropagation} y sigue siendo utilizado hoy en día.
+
+El entrenamiento de una red neuronal utilizando retropropagación hace que en cada iteración (época) del entrenamiento se hagan dos pasadas a través de la red neuronal, una hacia delante donde se hacen las predicciones y otra hacia atrás donde se van ajustando los pesos que han afectado a dichas decisiones para subsanar errores. Este proceso se va repitiendo hasta que se converge en una solución.
+
+
+Este proceso visto en detalle tiene los siguientes pasos \cite{book:homl}:
+\begin{enumerate}
+  \item Se procesa el dataset completo en cada época, dividiéndola en lotes (\textit{batch}).
+  \item Cada lote pasa por la capa de entrada de la arquitectura, que la envía directamente a la primera capa oculta. El algoritmo computa la salida de todas las neuronas de la capa, que se obtiene mediante la ecuación:
+  \[
+    h_{W,b}(X) = \Phi(XW+b)
+  \]
+
+  Donde X es la matriz de datos de entrada; W es la matriz de pesos, que está formada por tantas filas como neurona de entrada y tantas columnas como neuronas en la capa; b es el vector de sesgo, con un elemento por neurona y $\Phi$ es la función de activación. La salida de la capa se utiliza como datos de entrada para la siguiente capa, repitiendo el proceso descrito hasta la capa de salida.
+  
+  \item Una vez obtenida la salida de la última capa para cada uno de los elementos del lote, se mide el error del modelo mediante una función llamada de pérdida (\textit{loss}) y se computa cuánto contribuye cada conexión de salida al error aplicando la regla de la cadena. A continuación se progresa hacia atrás aplicando la misma regla.
+  \item Utilizando los gradientes de la función de error que se han computado en el paso anterior para cada capa, el algoritmo actualiza los pesos de cada neurona utilizando un algoritmo de descenso de gradiente.
+\end{enumerate}
+
+
+
 \subsubsection*{Uso de las redes neuronales convolucionales para visión computacional}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.6\textwidth]{images/cnn}
-  \caption{Esquema de funcionamiento de una CNN.}
+  \caption{Esquema de funcionamiento de una CNN \cite{mathWorksCnn}.}
   \label{fig:cnn}
 \end{figure}
 
-En 1958 \cite{art:cat58} y 1959 \cite{art:cat59}, David H. Hubel y Torsten Wiesel llevaron a cabo una serie de experimentos sobre el córtex visual de los gatos. En ellos, se halló la cantidad de neuronas que se encuentran en dicho córtex y cómo este funcionaba: se vio que las neuronas del córtex tienen un pequeño campo receptivo sobre todo el campo visual y la combinación de todos los campos receptivos es el campo visual total. Además, algunas neuronas reaccionaban a imágenes de líneas horizontales y otras a líneas verticales, mientras que otras neuronas tenían un campo receptivo mayor, de forma que combinaban estos patrones de bajo nivel en otros más complejos.
+En 1958 \cite{art:cat58} y 1959 \cite{art:cat59}, David H. Hubel y Torsten Wiesel llevaron a cabo una serie de experimentos sobre el córtex visual de los gatos. En ellos se halló la cantidad de neuronas que se encuentran en dicho córtex y cómo este funcionaba: las neuronas del córtex tienen un pequeño campo receptivo sobre todo el campo visual y la combinación de todos los campos receptivos es el campo visual total. Además, algunas neuronas reaccionaban a imágenes de líneas horizontales y otras a líneas verticales, mientras que otras neuronas tenían un campo receptivo mayor, de forma que combinaban estos patrones de bajo nivel en otros más complejos.
 
-Estos estudios inspiraron la creación del neocognitron \cite{art:neocognitron}. Esto modelo fue evolucionando hasta convertirse en lo que hoy conocemos como redes neuronales convolucionales. Un hito fue el artículo de \citet{lecun1998gradient} donde se propuso la arquitectura LeNet-5, utilizada por bancos para reconocer números escritos sobre cheques. La diferencia de las redes neuronales convolucionales sobre las clásicas es el empleo de capas convolucionales y de pooling. Típicamente, al final de las capas ocultas, se emplean capas densamente conectadas hasta llegar a la capa final donde se da la salida \cite{book:homl}.
+Estos estudios inspiraron la creación del neocognitron \cite{art:neocognitron}, que fue evolucionando hasta convertirse en lo que hoy conocemos como redes neuronales convolucionales (\textit{convolutional neuronal networks}, CNN). Un hito fue el artículo de \citet{lecun1998gradient} donde se propuso la arquitectura LeNet-5, utilizada por bancos para reconocer números escritos sobre cheques. La diferencia de las redes neuronales convolucionales sobre las clásicas es el empleo de capas convolucionales y de pooling. Típicamente, al final de las capas ocultas, se emplean capas densamente conectadas hasta llegar a la capa final donde se da la salida \cite{book:homl}.
 
-La irrupción de las CNN junto con la mayor capacidad de procesamiento matricial (principalmente en GPUs), ha propiciado resultados muy buenos en diversos ámbitos, entre ellos el de la visión artificial, donde son utilizadas como la arquitectura más utilizada en problemas de este tipo, ya que tienden a dar mejores resultados en problemas complejos que otros modelos más clásicos. De hecho, las redes tipo CNN han demostrado rendimiento mejor que el humano en ciertos problemas de reconocimiento visual.
+Las capas convolucionales y de pooling son similares en el sentido de que ambas están compuestas de una serie de filtros. En las convolucionales, los filtros realizan un paso a través de un \textit{array} de datos (típicamente, una imagen). De esta pasada se extraen las \textit{features} de la imagen, siendo estas de una mayor complejidad en cada capa oculta. En las capas de pooling, por su parte, el objetivo del filtro es el de hacer un submuestreo de la imagen de entrada, reduciendo así el número de parámetros y, por tanto, la probabilidad de sobreaprendizaje.
 
-Incluso, se plantea un debate sobre si las técnicas clásicas de visión computacional están obsoletas en favor de las redes neuronales convolucionales en trabajos como \cite{art:o2019deep}, aunque en ciertos dominios siguen siendo utilizadas dichas técnicas (a veces en conjunto a las CNN).
+La irrupción de las CNN junto con la mayor capacidad de procesamiento matricial (principalmente en GPUs), ha propiciado resultados muy buenos en diversos ámbitos, entre ellos el de la visión artificial, donde constituyen la arquitectura más utilizada en problemas de este tipo, ya que tienden a dar mejores resultados en problemas complejos que otros modelos más clásicos. De hecho, las redes tipo CNN han demostrado rendimiento mejor que el humano en ciertos problemas de reconocimiento visual. Incluso se plantea un debate sobre si las técnicas clásicas de visión computacional están obsoletas en favor de las redes neuronales convolucionales en trabajos como \cite{art:o2019deep}, aunque en ciertos dominios siguen siendo utilizadas dichas técnicas (a veces en combinación con las CNN).
 
-Un tipo particular de CNN son las que no cuentan con ninguna capa densa dentro de su arquitectura, denominadas \textit{fully convolutional network} o FCN y que fueron propuestas en 2015 (\citet{art:FCN2015}) para problemas de segmentación semántica. La ventaja de este tipo de arquitectura es que no requiere que las imágenes tengan un tamaño fijo, mientras que las CNN con capas densas requieren un tamaño concreto que coincide con el tamaño de las imágenes de entrenamiento. Una arquitectura de este tipo es la YOLO (\textit{you only look once}), propuesta en 2015 \cite{art:yolo} y mejorada en sucesivos trabajos en 2016 \cite{art:yolo2} y 2018 \cite{art:yolo3}.
+Dado que las CNN cuentan con capas densas al final de su arquitectura, solo son capaces de procesar imágenes del tamaño previsto por el diseñador (iguales que las imágenes de entrenamiento). Existe un tipo particular de arquitecturas que no cuentan con ninguna capa densa, denominadas \textit{fully convolutional network} o FCN y que fueron propuestas en 2015 (\citet{art:FCN2015}) para problemas de segmentación semántica. Una arquitectura de este tipo es la YOLO (\textit{You Only Look Once}), propuesta en 2015 \cite{art:yolo} y mejorada en sucesivos trabajos en 2016 \cite{art:yolo2} y 2018 \cite{art:yolo3}.
 
 \begin{figure}
   \centering
